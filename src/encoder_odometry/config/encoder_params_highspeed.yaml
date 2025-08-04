@@ -1,0 +1,55 @@
+/**:
+  ros__parameters:
+    # High-performance configuration for racing/fast robots
+    
+    # GPIO Pin Assignments (same as default)
+    pins:
+      front_left:
+        a: 17
+        b: 18
+      front_right:
+        a: 27
+        b: 22
+      rear_left:
+        a: 23
+        b: 24
+      rear_right:
+        a: 25
+        b: 4
+    
+    # Robot Parameters
+    robot:
+      wheel_diameter: 0.215
+      track_width: 0.380
+      wheelbase: 0.3645
+      encoder_ppr: 537.7
+      drive_mode: "4wd"
+    
+    # Direction Inversion
+    invert:
+      front_left: false
+      front_right: true
+      rear_left: false
+      rear_right: true
+    
+    # Topics and Frames
+    topics:
+      output_topic: "/odometry/encoders"
+      ticks_topic: "/encoders/ticks"
+    
+    frames:
+      base_frame: "base_link"
+      odom_frame: "odom_encoders"
+    
+    # High-performance Publishing Settings
+    publishing:
+      publish_rate: 100.0                   # Higher rate for fast motion
+      publish_tf: true
+      publish_raw_ticks: false              # Disable for performance
+      publish_diagnostics: false            # Disable for performance
+    
+    # Advanced Settings for High Speed
+    advanced:
+      gpio_pull_mode: "up"                  # More stable for high-speed signals
+      debounce_time: 0.0005                 # Shorter debounce for faster response
+      velocity_filter_alpha: 0.3           # More responsive filtering

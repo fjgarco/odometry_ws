@@ -1,0 +1,32 @@
+/**:
+  ros__parameters:
+    # RTK Configuration for high-precision GPS
+    gps_topic: "/mavros/global_position/raw/fix"
+    output_topic: "/odometry/gps"
+    
+    # Frame Configuration
+    base_frame: "base_link"
+    odom_frame: "odom_gps"
+    
+    # Use UTM for better accuracy over large areas
+    coordinate_system: "utm"
+    
+    # Fixed Origin for Survey Applications
+    # Set these to your survey origin point
+    # fixed_origin_lat: 40.123456789
+    # fixed_origin_lon: -74.987654321
+    # fixed_origin_alt: 123.45
+    
+    # Strict RTK Validation
+    min_fix_quality: 4            # RTK fixed solution (4) or RTK float (5)
+    max_position_covariance: 0.1  # Very tight covariance requirement for RTK
+    validate_coordinates: true
+    
+    # Publishing Settings
+    publish_tf: true
+    publish_stats: true
+    
+    # High-precision Covariances
+    default_position_covariance: 0.01     # Centimeter-level precision
+    orientation_covariance: 999999.0      # No orientation from GPS
+    velocity_covariance: 999999.0         # No velocity estimation

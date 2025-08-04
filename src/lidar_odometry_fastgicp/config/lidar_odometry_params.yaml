@@ -1,0 +1,19 @@
+# LIDAR Odometry FastGICP Configuration
+
+# Topics
+input_topic: "/livox/lidar"
+output_topic: "/odometry/lidar"
+
+# Frames
+base_frame: "base_link"
+odom_frame: "odom"
+
+# Preprocessing
+voxel_size: 0.5  # meters
+
+# FastGICP parameters
+use_cuda: false  # Set to true if CUDA is available
+max_iterations: 64
+transformation_epsilon: 1.0e-6
+euclidean_fitness_epsilon: 1.0e-6
+max_correspondence_distance: 1.0  # meters

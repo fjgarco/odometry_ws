@@ -1,0 +1,53 @@
+/**:
+  ros__parameters:
+    # GPIO Pin Assignments (Jetson BCM numbering)
+    pins:
+      front_left:
+        a: 17    # Channel A
+        b: 18    # Channel B
+      front_right:
+        a: 27    # Channel A
+        b: 22    # Channel B
+      rear_left:
+        a: 23    # Channel A
+        b: 24    # Channel B
+      rear_right:
+        a: 25    # Channel A
+        b: 4     # Channel B
+    
+    # Robot Physical Parameters
+    robot:
+      wheel_diameter: 0.215      # 215mm wheel diameter
+      track_width: 0.380         # 380mm between left and right wheels
+      wheelbase: 0.3645          # 364.5mm between front and rear axles
+      encoder_ppr: 537.7         # Pulses per revolution (at wheel output)
+      drive_mode: "4wd"          # "4wd" or "2wd" kinematics
+    
+    # Direction Inversion (compensate for motor/encoder mounting)
+    invert:
+      front_left: false          # Left wheels typically normal
+      front_right: true          # Right wheels typically inverted
+      rear_left: false           # Left wheels typically normal
+      rear_right: true           # Right wheels typically inverted
+    
+    # Topics and Frame Configuration
+    topics:
+      output_topic: "/odometry/encoders"    # Main odometry output
+      ticks_topic: "/encoders/ticks"        # Raw encoder ticks (debug)
+    
+    frames:
+      base_frame: "base_link"               # Robot base frame
+      odom_frame: "odom_encoders"           # Encoder odometry frame
+    
+    # Publishing Settings
+    publishing:
+      publish_rate: 50.0                    # Hz - odometry publishing rate
+      publish_tf: true                      # Publish TF transforms
+      publish_raw_ticks: true               # Publish raw encoder data
+      publish_diagnostics: true             # Periodic diagnostic info
+    
+    # Advanced GPIO and Signal Processing
+    advanced:
+      gpio_pull_mode: "down"                # "up", "down", or "none"
+      debounce_time: 0.001                  # Encoder debounce time (seconds)
+      velocity_filter_alpha: 0.1           # Low-pass filter for velocity (0-1)

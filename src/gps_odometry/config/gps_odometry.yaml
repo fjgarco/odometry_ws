@@ -1,0 +1,32 @@
+/**:
+  ros__parameters:
+    # Topic Configuration
+    gps_topic: "/mavros/global_position/raw/fix"
+    output_topic: "/odometry/gps"
+    
+    # Frame Configuration
+    base_frame: "base_link"
+    odom_frame: "odom_gps"
+    
+    # Coordinate System
+    coordinate_system: "enu"  # Options: "enu" or "utm"
+    
+    # Fixed Origin (optional - if not set, will use first valid fix)
+    # Uncomment and set these values to use a fixed origin
+    # fixed_origin_lat: 40.7128    # Example: New York City
+    # fixed_origin_lon: -74.0060
+    # fixed_origin_alt: 10.0
+    
+    # GPS Fix Validation
+    min_fix_quality: 1            # Minimum NavSatStatus.status (0=no fix, 1=fix, 2=DGPS fix, etc.)
+    max_position_covariance: 25.0 # Maximum acceptable position covariance (m²)
+    validate_coordinates: true    # Check for obviously invalid coordinates (0,0)
+    
+    # Publishing Settings
+    publish_tf: true             # Publish TF transform
+    publish_stats: true          # Publish periodic statistics
+    
+    # Covariance Settings
+    default_position_covariance: 1.0      # Default position uncertainty when GPS doesn't provide it
+    orientation_covariance: 999999.0      # Large value indicating no orientation info
+    velocity_covariance: 999999.0         # Large value indicating no velocity info
