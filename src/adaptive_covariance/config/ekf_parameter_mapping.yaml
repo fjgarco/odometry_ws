@@ -1,0 +1,238 @@
+# EKF Parameter Mapping Configuration
+# Maps sensor health status to robot_localization EKF parameters
+
+# EKF Parameter Mappings
+# Each mapping connects a sensor to specific EKF parameters that should be adjusted
+# based on the sensor's health status
+
+ekf_parameter_mappings:
+  # GPS Parameter Mappings
+  # GPS primarily affects position estimates in the EKF
+  - sensor_name: "gps"
+    ekf_parameter: "process_noise_covariance.0"  # x position process noise
+    baseline_value: 0.05
+    min_value: 0.005
+    max_value: 5.0
+    parameter_type: "process_noise"
+    description: "X position process noise for GPS"
+    
+  - sensor_name: "gps"
+    ekf_parameter: "process_noise_covariance.7"  # y position process noise  
+    baseline_value: 0.05
+    min_value: 0.005
+    max_value: 5.0
+    parameter_type: "process_noise"
+    description: "Y position process noise for GPS"
+    
+  - sensor_name: "gps"
+    ekf_parameter: "process_noise_covariance.14" # z position process noise
+    baseline_value: 0.06
+    min_value: 0.006
+    max_value: 6.0
+    parameter_type: "process_noise"
+    description: "Z position process noise for GPS"
+
+  # IMU Parameter Mappings
+  # IMU affects orientation and angular velocity estimates
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.21" # roll process noise
+    baseline_value: 0.03
+    min_value: 0.003
+    max_value: 3.0
+    parameter_type: "process_noise"
+    description: "Roll process noise for IMU"
+    
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.28" # pitch process noise
+    baseline_value: 0.03
+    min_value: 0.003
+    max_value: 3.0
+    parameter_type: "process_noise"
+    description: "Pitch process noise for IMU"
+    
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.35" # yaw process noise
+    baseline_value: 0.06
+    min_value: 0.006
+    max_value: 6.0
+    parameter_type: "process_noise"
+    description: "Yaw process noise for IMU"
+    
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.63" # roll velocity process noise
+    baseline_value: 0.03
+    min_value: 0.003
+    max_value: 3.0
+    parameter_type: "process_noise"
+    description: "Roll velocity process noise for IMU"
+    
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.70" # pitch velocity process noise
+    baseline_value: 0.03
+    min_value: 0.003
+    max_value: 3.0
+    parameter_type: "process_noise"
+    description: "Pitch velocity process noise for IMU"
+    
+  - sensor_name: "imu"
+    ekf_parameter: "process_noise_covariance.77" # yaw velocity process noise
+    baseline_value: 0.06
+    min_value: 0.006
+    max_value: 6.0
+    parameter_type: "process_noise"
+    description: "Yaw velocity process noise for IMU"
+
+  # LIDAR Odometry Parameter Mappings
+  # LIDAR affects position and orientation estimates
+  - sensor_name: "lidar"
+    ekf_parameter: "process_noise_covariance.0"  # x position process noise
+    baseline_value: 0.1
+    min_value: 0.01
+    max_value: 10.0
+    parameter_type: "process_noise"
+    description: "X position process noise for LIDAR"
+    
+  - sensor_name: "lidar"
+    ekf_parameter: "process_noise_covariance.7"  # y position process noise
+    baseline_value: 0.1
+    min_value: 0.01
+    max_value: 10.0
+    parameter_type: "process_noise"
+    description: "Y position process noise for LIDAR"
+    
+  - sensor_name: "lidar"
+    ekf_parameter: "process_noise_covariance.35" # yaw process noise
+    baseline_value: 0.2
+    min_value: 0.02
+    max_value: 20.0
+    parameter_type: "process_noise"
+    description: "Yaw process noise for LIDAR"
+
+  # Encoder Odometry Parameter Mappings
+  # Encoders primarily affect velocity estimates
+  - sensor_name: "encoders"
+    ekf_parameter: "process_noise_covariance.42" # x velocity process noise
+    baseline_value: 0.1
+    min_value: 0.01
+    max_value: 10.0
+    parameter_type: "process_noise"
+    description: "X velocity process noise for encoders"
+    
+  - sensor_name: "encoders"
+    ekf_parameter: "process_noise_covariance.49" # y velocity process noise
+    baseline_value: 0.1
+    min_value: 0.01
+    max_value: 10.0
+    parameter_type: "process_noise"
+    description: "Y velocity process noise for encoders"
+    
+  - sensor_name: "encoders"
+    ekf_parameter: "process_noise_covariance.77" # yaw velocity process noise
+    baseline_value: 0.2
+    min_value: 0.02
+    max_value: 20.0
+    parameter_type: "process_noise"
+    description: "Yaw velocity process noise for encoders"
+
+# Advanced Parameter Mappings for Observation (Measurement) Noise
+# These parameters control how much the EKF trusts individual sensor measurements
+
+observation_noise_mappings:
+  # GPS observation noise adjustments
+  - sensor_name: "gps"
+    ekf_parameter: "odom0_relative"  # If GPS is configured as odom0
+    baseline_covariance: [0.1, 0.1, 0.1, 0.0, 0.0, 0.0]  # x, y, z, roll, pitch, yaw
+    scaling_rules:
+      excellent: 0.5
+      good: 1.0
+      degraded: 2.0
+      poor: 5.0
+      failed: 100.0
+    
+  # IMU observation noise adjustments  
+  - sensor_name: "imu"
+    ekf_parameter: "imu0_relative"   # If IMU is configured as imu0
+    baseline_covariance: [0.0, 0.0, 0.0, 0.05, 0.05, 0.05]  # x, y, z, roll, pitch, yaw
+    scaling_rules:
+      excellent: 0.6
+      good: 1.0
+      degraded: 1.5
+      poor: 3.0
+      failed: 50.0
+
+# EKF Configuration Template
+# This section provides guidance for robot_localization configuration
+ekf_configuration_template:
+  # Standard EKF configuration that works with adaptive covariance
+  frequency: 30
+  sensor_timeout: 0.1
+  two_d_mode: false
+  transform_time_offset: 0.0
+  transform_timeout: 0.0
+  print_diagnostics: true
+  debug: false
+  
+  # Process noise covariance matrix (15x15)
+  # The diagonal elements correspond to:
+  # [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az]
+  # Indices: [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98]
+  process_noise_covariance: [
+    0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+    0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015
+  ]
+
+# Parameter Update Strategy Configuration
+parameter_update_strategy:
+  # How parameters should be updated
+  update_method: "immediate"        # "immediate", "batched", or "gradual"
+  batch_size: 5                     # Number of parameters to update together
+  gradual_step_size: 0.1           # Step size for gradual updates
+  
+  # Safety checks
+  enable_parameter_validation: true
+  enable_rollback: true
+  rollback_timeout: 30.0           # seconds
+  
+  # Update frequency control
+  max_updates_per_second: 10       # Limit update frequency
+  min_time_between_updates: 0.1    # Minimum time between parameter changes
+  
+  # Change detection
+  significant_change_threshold: 0.05  # 5% change is considered significant
+  enable_change_smoothing: true       # Smooth parameter changes
+  smoothing_factor: 0.8              # Exponential smoothing factor
+
+# Fallback and Emergency Configuration
+emergency_configuration:
+  # Conditions for emergency parameter reset
+  emergency_triggers:
+    - "sensor_failure_rate > 0.5"     # More than 50% of sensors failed
+    - "ekf_divergence_detected"        # EKF appears to be diverging
+    - "position_uncertainty > 100.0"   # Position uncertainty too high
+    
+  # Emergency actions
+  emergency_actions:
+    - "reset_to_baseline"              # Reset all parameters to baseline
+    - "disable_failed_sensors"         # Disable failed sensor inputs
+    - "increase_process_noise"         # Increase process noise globally
+    
+  # Recovery configuration
+  recovery_timeout: 60.0              # seconds to attempt recovery
+  recovery_validation_period: 10.0    # seconds to validate recovery
+  
+  # Baseline fallback values (conservative)
+  fallback_process_noise_multiplier: 3.0  # Multiply baseline by this factor
+  fallback_observation_noise_multiplier: 2.0

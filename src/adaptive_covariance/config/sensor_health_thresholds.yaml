@@ -1,0 +1,231 @@
+# Sensor Health Thresholds Configuration
+# Detailed thresholds for each sensor type and health assessment criteria
+
+# GPS/GNSS Health Thresholds
+gps:
+  # Data rate thresholds
+  rate_excellent: 15.0    # Hz - RTK with high update rate
+  rate_good: 10.0         # Hz - Standard GPS fix rate
+  rate_degraded: 5.0      # Hz - Minimum usable rate
+  rate_poor: 2.0          # Hz - Very low rate
+  rate_failed: 0.5        # Hz - Essentially no data
+  
+  # Fix quality thresholds
+  fix_status:
+    no_fix: 0             # No GPS fix
+    fix: 1                # Standard GPS fix
+    rtk_fix: 2            # RTK fixed solution
+  
+  # HDOP (Horizontal Dilution of Precision) thresholds
+  hdop_excellent: 0.8     # Excellent GPS geometry
+  hdop_good: 1.5          # Good GPS geometry
+  hdop_degraded: 3.0      # Degraded but usable
+  hdop_poor: 5.0          # Poor geometry
+  hdop_failed: 10.0       # Very poor geometry
+  
+  # Position covariance thresholds (m²)
+  covariance_excellent: 1.0    # RTK-level accuracy
+  covariance_good: 5.0         # Good GPS accuracy
+  covariance_degraded: 25.0    # Standard GPS accuracy
+  covariance_poor: 100.0       # Poor GPS accuracy
+  covariance_failed: 1000.0    # Very poor accuracy
+  
+  # Additional GPS health indicators
+  satellite_count_min: 6       # Minimum satellites for reliable fix
+  satellite_count_good: 8      # Good satellite count
+  velocity_consistency_threshold: 0.5  # m/s - consistency check
+
+# IMU Health Thresholds
+imu:
+  # Data rate thresholds
+  rate_excellent: 200.0   # Hz - High-frequency IMU
+  rate_good: 100.0        # Hz - Standard IMU rate
+  rate_degraded: 50.0     # Hz - Minimum for good integration
+  rate_poor: 20.0         # Hz - Low rate but usable
+  rate_failed: 5.0        # Hz - Too low for reliable use
+  
+  # Acceleration magnitude thresholds (m/s²)
+  # Note: Stationary robot should read ~9.8 m/s²
+  accel_excellent_min: 8.0     # Lower bound for excellent
+  accel_excellent_max: 11.0    # Upper bound for excellent
+  accel_good_min: 6.0          # Lower bound for good
+  accel_good_max: 15.0         # Upper bound for good
+  accel_degraded_min: 3.0      # Lower bound for degraded
+  accel_degraded_max: 25.0     # Upper bound for degraded
+  accel_poor_min: 1.0          # Lower bound for poor
+  accel_poor_max: 50.0         # Upper bound for poor
+  
+  # Gyroscope magnitude thresholds (rad/s)
+  gyro_excellent_max: 0.5      # Very stable
+  gyro_good_max: 2.0           # Normal operation
+  gyro_degraded_max: 5.0       # Some movement/vibration
+  gyro_poor_max: 10.0          # High rotation rates
+  gyro_failed_max: 50.0        # Excessive rotation
+  
+  # Orientation covariance thresholds
+  orientation_cov_excellent: 0.01   # Very confident orientation
+  orientation_cov_good: 0.1         # Good orientation confidence
+  orientation_cov_degraded: 0.5     # Moderate confidence
+  orientation_cov_poor: 2.0         # Low confidence
+  orientation_cov_failed: 10.0      # Very low confidence
+  
+  # Bias stability thresholds
+  accel_bias_threshold: 2.0         # m/s² - accelerometer bias drift
+  gyro_bias_threshold: 0.1          # rad/s - gyroscope bias drift
+
+# Magnetometer Health Thresholds
+magnetometer:
+  # Data rate thresholds
+  rate_excellent: 50.0    # Hz - High update rate
+  rate_good: 30.0         # Hz - Standard rate
+  rate_degraded: 10.0     # Hz - Low but usable
+  rate_poor: 5.0          # Hz - Very low rate
+  rate_failed: 1.0        # Hz - Essentially no data
+  
+  # Magnetic field magnitude thresholds (µT)
+  # Note: Earth's magnetic field is typically 25-65 µT
+  mag_excellent_min: 35.0      # Lower bound for excellent
+  mag_excellent_max: 55.0      # Upper bound for excellent
+  mag_good_min: 25.0           # Lower bound for good
+  mag_good_max: 65.0           # Upper bound for good
+  mag_degraded_min: 15.0       # Lower bound for degraded
+  mag_degraded_max: 80.0       # Upper bound for degraded
+  mag_poor_min: 5.0            # Lower bound for poor
+  mag_poor_max: 150.0          # Upper bound for poor
+  
+  # Heading stability thresholds (rad)
+  heading_jump_excellent: 0.1      # Very stable heading
+  heading_jump_good: 0.3           # Stable heading
+  heading_jump_degraded: 0.5       # Some heading variation
+  heading_jump_poor: 1.0           # Unstable heading
+  heading_jump_failed: 2.0         # Very unstable heading
+  
+  # Magnetic interference detection
+  interference_threshold: 20.0     # µT - sudden field changes
+  declination_error_threshold: 0.2 # rad - declination consistency
+
+# LIDAR Odometry Health Thresholds
+lidar:
+  # Data rate thresholds
+  rate_excellent: 30.0    # Hz - High-frequency LIDAR
+  rate_good: 20.0         # Hz - Standard LIDAR rate
+  rate_degraded: 10.0     # Hz - Minimum for good tracking
+  rate_poor: 5.0          # Hz - Low rate
+  rate_failed: 1.0        # Hz - Too low for reliable tracking
+  
+  # Point cloud quality thresholds
+  points_excellent: 50000      # High-density point cloud
+  points_good: 20000           # Good point density
+  points_degraded: 5000        # Minimum usable density
+  points_poor: 1000            # Low point density
+  points_failed: 100           # Very few points
+  
+  # Position covariance thresholds (m²)
+  position_cov_excellent: 0.01     # Very accurate tracking
+  position_cov_good: 0.1           # Good tracking accuracy
+  position_cov_degraded: 1.0       # Moderate accuracy
+  position_cov_poor: 10.0          # Poor accuracy
+  position_cov_failed: 100.0       # Very poor accuracy
+  
+  # Velocity consistency thresholds
+  velocity_max_reasonable: 10.0    # m/s - maximum reasonable robot velocity
+  velocity_jump_threshold: 2.0     # m/s - sudden velocity changes
+  
+  # Feature tracking quality
+  feature_tracking_excellent: 0.95  # 95% features tracked
+  feature_tracking_good: 0.85       # 85% features tracked
+  feature_tracking_degraded: 0.7    # 70% features tracked
+  feature_tracking_poor: 0.5        # 50% features tracked
+
+# Encoder Odometry Health Thresholds
+encoders:
+  # Data rate thresholds
+  rate_excellent: 100.0   # Hz - High-frequency encoder updates
+  rate_good: 50.0         # Hz - Standard encoder rate
+  rate_degraded: 20.0     # Hz - Minimum for smooth odometry
+  rate_poor: 10.0         # Hz - Low rate
+  rate_failed: 2.0        # Hz - Too low for reliable odometry
+  
+  # Velocity thresholds (m/s)
+  velocity_max_reasonable: 5.0     # Maximum reasonable robot velocity
+  velocity_consistency_threshold: 0.2  # Velocity consistency check
+  
+  # Slip detection thresholds
+  slip_excellent: 0.02     # 2% slip - excellent grip
+  slip_good: 0.05          # 5% slip - good grip
+  slip_degraded: 0.1       # 10% slip - some slipping
+  slip_poor: 0.2           # 20% slip - significant slipping
+  slip_failed: 0.5         # 50% slip - major wheel slip
+  
+  # Wheel synchronization thresholds
+  wheel_sync_excellent: 0.01   # 1% difference between wheels
+  wheel_sync_good: 0.05        # 5% difference
+  wheel_sync_degraded: 0.1     # 10% difference
+  wheel_sync_poor: 0.2         # 20% difference
+  wheel_sync_failed: 0.5       # 50% difference
+  
+  # Tick rate thresholds (ticks/second per wheel)
+  tick_rate_max: 5000          # Maximum reasonable tick rate
+  tick_rate_min: 1             # Minimum tick rate for movement detection
+
+# Raw Encoder Tick Health Thresholds
+encoder_raw:
+  # Data rate thresholds
+  rate_excellent: 200.0   # Hz - Very high update rate
+  rate_good: 100.0        # Hz - High update rate
+  rate_degraded: 50.0     # Hz - Standard rate
+  rate_poor: 20.0         # Hz - Low rate
+  rate_failed: 5.0        # Hz - Very low rate
+  
+  # Tick consistency thresholds
+  tick_consistency_excellent: 0.01  # 1% variation
+  tick_consistency_good: 0.05       # 5% variation
+  tick_consistency_degraded: 0.1    # 10% variation
+  tick_consistency_poor: 0.2        # 20% variation
+  
+  # Per-wheel health thresholds
+  wheel_health:
+    stuck_threshold: 0.001      # Wheel considered stuck if no ticks
+    noise_threshold: 100        # Ticks - excessive noise detection
+    dropout_threshold: 0.1      # Fraction of missing updates
+
+# Cross-sensor validation thresholds
+cross_validation:
+  # Velocity consistency between sensors (m/s)
+  velocity_consistency:
+    excellent: 0.1    # 10 cm/s difference
+    good: 0.2         # 20 cm/s difference
+    degraded: 0.5     # 50 cm/s difference
+    poor: 1.0         # 1 m/s difference
+    failed: 2.0       # 2 m/s difference
+  
+  # Position consistency between absolute sensors (m)
+  position_consistency:
+    excellent: 0.5    # 50 cm difference
+    good: 1.0         # 1 m difference
+    degraded: 3.0     # 3 m difference
+    poor: 10.0        # 10 m difference
+    failed: 50.0      # 50 m difference
+  
+  # Heading consistency between sensors (rad)
+  heading_consistency:
+    excellent: 0.1    # ~6 degrees
+    good: 0.2         # ~11 degrees
+    degraded: 0.5     # ~29 degrees
+    poor: 1.0         # ~57 degrees
+    failed: 2.0       # ~115 degrees
+
+# Temporal analysis thresholds
+temporal_analysis:
+  # Trend analysis windows (seconds)
+  short_term_window: 10.0       # Short-term trend analysis
+  medium_term_window: 60.0      # Medium-term trend analysis
+  long_term_window: 300.0       # Long-term trend analysis
+  
+  # Degradation detection thresholds
+  degradation_rate_threshold: 0.1    # 10% performance degradation rate
+  improvement_rate_threshold: 0.05   # 5% performance improvement rate
+  
+  # Alert escalation thresholds
+  consecutive_warnings_limit: 5      # Escalate after 5 consecutive warnings
+  alert_frequency_limit: 0.1         # Max 0.1 alerts per second per sensor

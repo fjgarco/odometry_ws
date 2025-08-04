@@ -1,0 +1,204 @@
+# Adaptive Covariance Configuration
+# Main configuration for sensor health monitoring and EKF covariance adjustment
+
+# Global settings
+global:
+  enable_adaptive_covariance: true
+  enable_ekf_adjustment: true
+  enable_diagnostics: true
+  log_level: "INFO"  # DEBUG, INFO, WARN, ERROR
+
+# Timing configuration
+timing:
+  monitoring_period: 0.1      # 10 Hz sensor health monitoring
+  adjustment_period: 0.2      # 5 Hz EKF covariance adjustment
+  trend_analysis_period: 10.0 # 0.1 Hz long-term trend analysis
+
+# Sensor configuration
+sensors:
+  gps:
+    topic: "/mavros/global_position/raw/fix"
+    type: "nav_sat_fix"
+    expected_rate: 10.0  # Hz
+    timeout: 2.0         # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 5.0           # Minimum acceptable data rate (Hz)
+      hdop_warn: 2.0          # HDOP warning threshold
+      hdop_error: 5.0         # HDOP error threshold
+      covariance_warn: 25.0   # Position covariance warning (m²)
+      covariance_error: 100.0 # Position covariance error (m²)
+      fix_status_min: 1       # Minimum fix status (0=NO_FIX, 1=FIX, 2=RTK_FIX)
+    
+    # Covariance adjustment rules
+    adjustment_rules:
+      excellent_factor: 0.5   # σ factor for excellent health
+      good_factor: 1.0        # σ factor for good health
+      degraded_factor: 2.0    # σ factor for degraded health
+      poor_factor: 5.0        # σ factor for poor health
+      failed_factor: 100.0    # σ factor for failed sensor
+
+  imu:
+    topic: "/mavros/imu/data"
+    type: "imu"
+    expected_rate: 100.0  # Hz
+    timeout: 1.0          # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 50.0          # Minimum acceptable data rate (Hz)
+      accel_min: 5.0          # Minimum acceleration magnitude (m/s²)
+      accel_max: 20.0         # Maximum acceleration magnitude (m/s²)
+      gyro_max: 10.0          # Maximum gyroscope reading (rad/s)
+      orientation_cov_max: 1.0 # Maximum orientation covariance
+    
+    # Covariance adjustment rules
+    adjustment_rules:
+      excellent_factor: 0.6
+      good_factor: 1.0
+      degraded_factor: 1.5
+      poor_factor: 3.0
+      failed_factor: 50.0
+
+  magnetometer:
+    topic: "/mavros/imu/mag"
+    type: "magnetic_field"
+    expected_rate: 30.0   # Hz
+    timeout: 2.0          # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 10.0           # Minimum acceptable data rate (Hz)
+      mag_min: 20.0            # Minimum magnetic field (µT)
+      mag_max: 100.0           # Maximum magnetic field (µT)
+      heading_jump_max: 0.5    # Maximum heading jump (rad)
+
+  lidar:
+    topic: "/odometry/lidar"
+    type: "odometry"
+    expected_rate: 20.0   # Hz
+    timeout: 1.0          # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 10.0           # Minimum acceptable data rate (Hz)
+      position_cov_warn: 1.0   # Position covariance warning
+      position_cov_error: 10.0 # Position covariance error
+      velocity_max: 10.0       # Maximum reasonable velocity (m/s)
+    
+    # Covariance adjustment rules
+    adjustment_rules:
+      excellent_factor: 0.7
+      good_factor: 1.0
+      degraded_factor: 2.0
+      poor_factor: 4.0
+      failed_factor: 20.0
+
+  encoders:
+    topic: "/odometry/encoders"
+    type: "odometry"
+    expected_rate: 50.0   # Hz
+    timeout: 1.0          # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 20.0           # Minimum acceptable data rate (Hz)
+      velocity_max: 5.0        # Maximum reasonable velocity (m/s)
+      slip_warn: 0.1           # Slip warning threshold (10%)
+      slip_error: 0.3          # Slip error threshold (30%)
+    
+    # Covariance adjustment rules
+    adjustment_rules:
+      excellent_factor: 0.8
+      good_factor: 1.0
+      degraded_factor: 1.8
+      poor_factor: 3.5
+      failed_factor: 15.0
+
+  encoder_raw:
+    topic: "/encoders/ticks"
+    type: "encoder_ticks"
+    expected_rate: 100.0  # Hz
+    timeout: 0.5          # seconds
+    enable_monitoring: true
+    
+    # Health thresholds
+    thresholds:
+      rate_min: 50.0           # Minimum acceptable data rate (Hz)
+      slip_warn: 0.1           # Slip warning threshold
+      slip_error: 0.2          # Slip error threshold
+      tick_rate_max: 10000     # Maximum tick rate per wheel
+
+# Health evaluation configuration
+health_evaluation:
+  # Time windows for analysis
+  immediate_window: 10      # samples for immediate health evaluation
+  trend_window: 100         # samples for trend analysis
+  baseline_window: 1000     # samples for baseline establishment
+  
+  # Alert thresholds
+  consecutive_alerts_limit: 5     # Escalate after N consecutive alerts
+  alert_rate_limit: 0.1           # Max alerts per second per sensor
+  
+  # Performance baselines
+  baseline_update_rate: 0.01      # Update baseline every 100 samples
+  baseline_adaptation_factor: 0.05 # Adaptation rate for baseline values
+
+# EKF interface configuration
+ekf_interface:
+  namespace: "robot_localization"
+  node_name: "ekf_filter_node"
+  connection_timeout: 10.0        # seconds
+  parameter_update_timeout: 2.0   # seconds
+  
+  # Safety limits
+  max_adjustment_factor: 10.0     # Maximum covariance multiplication
+  min_adjustment_factor: 0.1      # Minimum covariance multiplication
+  parameter_change_rate_limit: 2.0 # Maximum change rate (factor/second)
+  
+  # Parameter update strategy
+  update_strategy: "immediate"    # "immediate" or "batched"
+  batch_update_period: 1.0        # seconds (if batched)
+  significant_change_threshold: 0.05 # 5% change threshold
+
+# Diagnostic and logging configuration
+diagnostics:
+  enable_diagnostic_publisher: true
+  diagnostic_update_rate: 1.0     # Hz
+  
+  # Log levels for different components
+  sensor_health_log_level: "INFO"
+  ekf_adjustment_log_level: "INFO"
+  performance_log_level: "DEBUG"
+  
+  # History retention
+  max_alert_history: 1000         # Maximum alerts to keep in memory
+  max_adjustment_history: 500     # Maximum adjustments to keep
+  
+  # Performance metrics
+  enable_performance_metrics: true
+  performance_update_rate: 0.1    # Hz
+
+# Advanced features
+advanced:
+  # Predictive health assessment
+  enable_predictive_health: false
+  prediction_horizon: 30.0        # seconds
+  
+  # Cross-sensor validation
+  enable_cross_validation: true
+  validation_threshold: 0.2       # 20% difference threshold
+  
+  # Adaptive thresholds
+  enable_adaptive_thresholds: false
+  threshold_adaptation_rate: 0.01
+  
+  # Emergency handling
+  emergency_reset_threshold: 0.1  # Reset if 90% of sensors fail
+  emergency_baseline_timeout: 5.0 # seconds

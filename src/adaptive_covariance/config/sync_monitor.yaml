@@ -1,0 +1,136 @@
+# Sync Monitor Configuration
+# Multi-sensor synchronization parameters for odometry fusion
+
+sync_monitor:
+  ros__parameters:
+    
+    # === Synchronization Parameters ===
+    sync_tolerance_ms: 50.0        # Maximum time difference for synchronization (ms)
+    queue_size: 10                 # Message queue size for each sensor
+    
+    # === Sensor Topic Configuration ===
+    topics:
+      visual_odom: "/zed/odom"                           # ZED camera odometry
+      lidar_odom: "/odometry/lidar"                      # LIVOX HAP LIDAR odometry  
+      gnss_odom: "/odometry/gps"                         # GPS/GNSS odometry
+      imu_data: "/mavros/imu/data"                       # IMU data from Pixhawk
+      encoder_odom: "/odometry/encoder"                  # Wheel encoder odometry
+    
+    # === Sensor Enable/Disable Flags ===
+    sensors:
+      enable_visual: true          # Enable visual odometry sync
+      enable_lidar: true           # Enable LIDAR odometry sync
+      enable_gnss: true            # Enable GNSS odometry sync  
+      enable_imu: true             # Enable IMU data sync
+      enable_encoder: true         # Enable encoder odometry sync
+    
+    # === Monitoring and Health Parameters ===
+    max_delay_warning_ms: 100.0    # Warning threshold for sensor delay (ms)
+    max_delay_critical_ms: 500.0   # Critical threshold for sensor delay (ms)
+    monitoring_rate_hz: 1.0        # Rate for status publishing (Hz)
+    
+    # === Fallback and Robustness ===
+    min_sensors_required: 2        # Minimum sensors needed for operation
+    timeout_sensor_missing_s: 5.0  # Timeout before marking sensor as missing (s)
+    
+    # === Debug and Logging ===
+    enable_debug_logging: false    # Enable detailed debug output
+    debug_log_interval_s: 5.0      # Interval for debug log messages (s)
+
+# Alternative configurations for different scenarios:
+
+# === Indoor Configuration (No GPS) ===
+sync_monitor_indoor:
+  ros__parameters:
+    sync_tolerance_ms: 30.0        # Tighter sync for indoor sensors
+    queue_size: 15
+    
+    topics:
+      visual_odom: "/zed/odom"
+      lidar_odom: "/odometry/lidar"
+      imu_data: "/mavros/imu/data"
+      encoder_odom: "/odometry/encoder"
+    
+    sensors:
+      enable_visual: true
+      enable_lidar: true
+      enable_gnss: false           # Disable GPS for indoor
+      enable_imu: true
+      enable_encoder: true
+    
+    min_sensors_required: 3        # Require more sensors without GPS
+    max_delay_warning_ms: 50.0     # Stricter indoor timing
+    max_delay_critical_ms: 200.0
+
+# === Outdoor Configuration (All Sensors) ===  
+sync_monitor_outdoor:
+  ros__parameters:
+    sync_tolerance_ms: 100.0       # More tolerant for GPS delays
+    queue_size: 20
+    
+    topics:
+      visual_odom: "/zed/odom"
+      lidar_odom: "/odometry/lidar"
+      gnss_odom: "/odometry/gps"
+      imu_data: "/mavros/imu/data"
+      encoder_odom: "/odometry/encoder"
+    
+    sensors:
+      enable_visual: true
+      enable_lidar: true
+      enable_gnss: true
+      enable_imu: true
+      enable_encoder: true
+    
+    min_sensors_required: 2        # More relaxed with GPS available
+    max_delay_warning_ms: 150.0    # Account for GPS processing delays
+    max_delay_critical_ms: 800.0
+
+# === High-Speed Configuration ===
+sync_monitor_highspeed:
+  ros__parameters:
+    sync_tolerance_ms: 20.0        # Very tight sync for high-speed motion
+    queue_size: 25                 # Larger queues for high-frequency data
+    
+    topics:
+      visual_odom: "/zed/odom"
+      lidar_odom: "/odometry/lidar"
+      gnss_odom: "/odometry/gps"
+      imu_data: "/mavros/imu/data"
+      encoder_odom: "/odometry/encoder"
+    
+    sensors:
+      enable_visual: true
+      enable_lidar: true
+      enable_gnss: true
+      enable_imu: true
+      enable_encoder: true
+    
+    monitoring_rate_hz: 5.0        # More frequent monitoring
+    max_delay_warning_ms: 30.0     # Very strict timing requirements
+    max_delay_critical_ms: 100.0
+    enable_debug_logging: true     # Enable for performance analysis
+
+# === Debug Configuration ===
+sync_monitor_debug:
+  ros__parameters:
+    sync_tolerance_ms: 50.0
+    queue_size: 10
+    
+    topics:
+      visual_odom: "/zed/odom"
+      lidar_odom: "/odometry/lidar"
+      gnss_odom: "/odometry/gps"
+      imu_data: "/mavros/imu/data"
+      encoder_odom: "/odometry/encoder"
+    
+    sensors:
+      enable_visual: true
+      enable_lidar: true
+      enable_gnss: true
+      enable_imu: true
+      enable_encoder: true
+    
+    enable_debug_logging: true     # Detailed logging for debugging
+    debug_log_interval_s: 2.0      # Frequent debug output
+    monitoring_rate_hz: 2.0        # More frequent status updates

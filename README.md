@@ -4,14 +4,15 @@ Complete multi-sensor odometry system for ROS 2 Humble featuring LIDAR, IMU/Magn
 
 ## Overview
 
-This workspace provides a comprehensive odometry estimation framework with four independent sensor-based odometry packages:
+This workspace provides a comprehensive odometry estimation framework with four independent sensor-based odometry packages and an intelligent adaptive covariance system:
 
 1. **LIDAR Odometry (FastGICP)** - High-precision point cloud registration for LIVOX HAP sensor
 2. **IMU/Magnetometer Odometry** - Madgwick filter-based orientation and motion estimation  
 3. **GPS Odometry** - Absolute positioning from GNSS RTK data with geodetic conversion
 4. **Encoder Odometry** - Wheel-based odometry using quadrature encoders and Jetson GPIO
+5. **Adaptive Covariance** - Intelligent sensor health monitoring and dynamic EKF covariance adjustment
 
-All packages are designed to work independently or together in a sensor fusion framework, publishing to standardized topics for integration with the ROS 2 navigation stack.
+All packages are designed to work independently or together in a sensor fusion framework, with the adaptive covariance system providing real-time optimization of fusion parameters based on sensor health assessment.
 
 ## System Architecture
 
@@ -30,14 +31,15 @@ All packages are designed to work independently or together in a sensor fusion f
           ▼                    ▼                    ▼                    ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │/odometry/lidar  │  │/odometry/imu_mag│  │ /odometry/gps   │  │/odometry/encoders│
-└─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────────┘
+└─────────┬───────┘  └─────────┬───────┘  └─────────┬───────┘  └─────────┬───────┘
           │                    │                    │                    │
           └──────────┬─────────┴──────────┬─────────┴────────────────────┘
                      ▼                    ▼
           ┌─────────────────┐    ┌─────────────────┐
-          │ Sensor Fusion   │    │ Backup/Compare  │
-          │ (robot_localization, │ (Independent   │
-          │  kalman_filter) │    │  Validation)   │
+          │ Adaptive        │    │ Sensor Fusion   │
+          │ Covariance      │    │ (robot_locali-  │
+          │ (Health Monitor │    │  zation, EKF)   │
+          │ + EKF Tuning)   │    │                 │
           └─────────────────┘    └─────────────────┘
 ```
 
@@ -68,6 +70,11 @@ odometry_ws/
 │   │   ├── launch/                    # Launch files
 │   │   ├── config/                    # Configuration files
 │   │   └── README.md                  # Package documentation
+│   ├── adaptive_covariance/           # Adaptive covariance package
+│   │   ├── adaptive_covariance/       # Python implementation
+│   │   ├── launch/                    # Launch files
+│   │   ├── config/                    # Configuration files
+│   │   └── README.md                  # Package documentation
 │   └── complete_odometry.launch.py    # Main workspace launch file
 └── README.md                          # This file
 ```
@@ -90,10 +97,12 @@ sudo apt install -y \
     ros-humble-nav-msgs \
     ros-humble-geometry-msgs \
     ros-humble-tf2-ros \
-    ros-humble-mavros-msgs
+    ros-humble-mavros-msgs \
+    ros-humble-message-filters \
+    ros-humble-robot-localization
 
 # Python dependencies
-pip3 install pyproj numpy
+pip3 install pyproj numpy scipy
 
 # Jetson GPIO for encoder odometry (Jetson boards only)
 sudo pip3 install Jetson.GPIO
@@ -117,21 +126,26 @@ source install/setup.bash
 ### 3. Launch Complete System
 
 ```bash
-# Launch all odometry nodes
+# Launch all odometry nodes with adaptive covariance
 ros2 launch src/complete_odometry.launch.py
+
+# Launch without adaptive covariance (static EKF parameters)
+ros2 launch src/complete_odometry.launch.py use_adaptive_covariance:=false
 
 # Launch individual packages
 ros2 launch lidar_odometry_fastgicp lidar_odometry.launch.py
 ros2 launch imu_mag_odometry imu_mag_odometry.launch.py
 ros2 launch gps_odometry gps_odometry.launch.py
 ros2 launch encoder_odometry encoder_odometry.launch.py
+ros2 launch adaptive_covariance adaptive_covariance.launch.py
 
-# Launch with custom topics
+# Launch with custom topics and adaptive covariance
 ros2 launch src/complete_odometry.launch.py \
     lidar_topic:=/your/lidar/topic \
     imu_topic:=/your/imu/topic \
     gps_topic:=/your/gps/topic \
-    use_encoders:=true
+    use_encoders:=true \
+    use_adaptive_covariance:=true
 ```
 
 ## Package Details
@@ -191,6 +205,36 @@ ros2 launch src/complete_odometry.launch.py \
 **Topics**:
 - Input: GPIO pins (quadrature A/B signals)
 - Output: `/odometry/encoders` (nav_msgs/Odometry), `/encoders/ticks` (custom debug)
+
+### Adaptive Covariance
+
+**Purpose**: Intelligent sensor health monitoring and dynamic EKF covariance adjustment for robust multi-sensor fusion.
+
+**Key Features**:
+- Real-time sensor health assessment using configurable heuristics
+- Dynamic EKF parameter adjustment based on sensor performance
+- Safety-first design with conservative limits and rollback capabilities
+- Comprehensive diagnostics and performance logging
+
+**Topics**:
+- Input: All sensor topics (monitoring)
+- Output: `/adaptive_covariance/sensor_health`, `/ekf_adapter/parameter_changes`
+- Interface: `robot_localization` parameter services
+
+### Sync Monitor
+
+**Purpose**: Multi-sensor temporal synchronization for accurate sensor fusion analysis and adaptive covariance adjustment.
+
+**Key Features**:
+- `message_filters` based temporal alignment (±50ms configurable)
+- Robust fallback operation with missing sensors
+- Real-time delay monitoring and quality assessment
+- Scenario-specific configurations (indoor/outdoor/high-speed)
+
+**Topics**:
+- Input: All odometry and sensor topics
+- Output: `/adaptive_covariance/synchronized_data`, `/adaptive_covariance/sync_status`
+- Service: `/adaptive_covariance/get_sync_status`
 
 ## Configuration
 
@@ -262,6 +306,9 @@ ekf_filter_node:
   ros__parameters:
     frequency: 30.0
     
+    # Enable adaptive covariance parameter services
+    enable_parameter_services: true
+    
     # Odometry sources
     odom0: /odometry/lidar
     odom0_config: [true,  true,  true,   # x, y, z
@@ -283,6 +330,9 @@ ekf_filter_node:
                    false, false, false,  # vx, vy, vz
                    false, false, false,  # vroll, vpitch, vyaw
                    false, false, false]  # ax, ay, az
+                   
+    # Process noise covariance (adjusted dynamically by adaptive_covariance)
+    process_noise_covariance: [0.05, 0, 0, ...]  # Will be modified in real-time
 ```
 
 ## Monitoring and Debugging
@@ -338,6 +388,8 @@ ros2 run plotjuggler plotjuggler
 ✅ **IMU/Magnetometer Odometry**: Complete with Madgwick filter  
 ✅ **GPS Odometry**: Complete with geodetic conversion (ENU/UTM)  
 ✅ **Encoder Odometry**: Complete with 4WD quadrature decoding and Jetson GPIO  
+✅ **Adaptive Covariance**: Complete with intelligent sensor health monitoring and EKF tuning  
+✅ **Sync Monitor**: Complete with multi-sensor temporal synchronization and quality assessment  
 
 ## License
 

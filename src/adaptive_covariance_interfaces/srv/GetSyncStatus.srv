@@ -1,0 +1,12 @@
+# Service to query current synchronization status
+---
+bool success
+string message
+string overall_status
+int64 sync_callback_count
+int32 active_sensor_count
+int32 total_sensor_count
+float64 sync_success_rate
+float64 max_delay_ms
+float64 last_sync_age_s
+string[] sensor_details

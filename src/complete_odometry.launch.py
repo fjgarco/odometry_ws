@@ -40,6 +40,18 @@ def generate_launch_description():
         description='Enable encoder odometry'
     )
     
+    declare_use_adaptive_covariance = DeclareLaunchArgument(
+        'use_adaptive_covariance',
+        default_value='true',
+        description='Enable adaptive covariance system with intelligent sensor fusion'
+    )
+    
+    declare_use_sync_monitor = DeclareLaunchArgument(
+        'use_sync_monitor',
+        default_value='true',
+        description='Enable multi-sensor synchronization monitor'
+    )
+    
     declare_lidar_topic = DeclareLaunchArgument(
         'lidar_topic',
         default_value='/livox/lidar',
@@ -138,11 +150,32 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('use_encoders'))
     )
     
+    # Adaptive Covariance Launch
+    adaptive_covariance_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                FindPackageShare('adaptive_covariance'),
+                'launch',
+                'adaptive_covariance.launch.py'
+            ])
+        ]),
+        launch_arguments={
+            'enable_adaptive_covariance': 'true',
+            'enable_ekf_adjustment': 'true',
+            'enable_sensor_health_monitor': 'true',
+            'ekf_namespace': 'robot_localization',
+            'use_sync_monitor': LaunchConfiguration('use_sync_monitor'),
+        }.items(),
+        condition=IfCondition(LaunchConfiguration('use_adaptive_covariance'))
+    )
+
     return LaunchDescription([
         declare_use_lidar,
         declare_use_imu_mag,
         declare_use_gps,
         declare_use_encoders,
+        declare_use_adaptive_covariance,
+        declare_use_sync_monitor,
         declare_lidar_topic,
         declare_imu_topic,
         declare_mag_topic,
@@ -151,4 +184,5 @@ def generate_launch_description():
         imu_mag_odometry_launch,
         gps_odometry_launch,
         encoder_odometry_launch,
+        adaptive_covariance_launch,
     ])
